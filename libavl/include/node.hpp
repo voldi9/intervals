@@ -5,19 +5,26 @@
 
 namespace avl {
 
-template <typename T>
+template <class T>
 class Node {
+	typedef unsigned int uint;
 private:
-	std::shared_ptr<Node<T>> m_parent, m_lson, m_rson;	
-	T m_value;
-
+	std::shared_ptr<Node<T>> m_parent {}, m_lson {}, m_rson {};	
+	T m_value {};
+	uint m_depth {};
 public:
 	virtual const T& get_value() const {
 		return m_value;
 	}
-
 	virtual void set_value(const T& value) {
 		m_value = value;
+	}
+
+	virtual const uint get_depth() const {
+		return m_depth;
+	}
+	virtual void set_depth(const uint depth) {
+		m_depth = depth;
 	}
 
 	virtual const std::shared_ptr<Node<T>>& get_parent() const {
@@ -40,30 +47,12 @@ public:
 	virtual void set_rson(const std::shared_ptr<Node<T>>& rson) {
 		m_rson = rson;
 	}
+	
+	Node(T value) : m_value(value) {}
 
-	bool operator<(const Node<T>& rhs) const {
-		return m_value < rhs.get_value();
-	}
-	bool operator<=(const Node<T>& rhs) const {
-		return m_value <= rhs.get_value();
-	}
-	bool operator>(const Node<T>& rhs) const {
-		return m_value > rhs.get_value();
-	}
-	bool operator>=(const Node<T>& rhs) const {
-		return m_value >= rhs.get_value();
-	}
-	bool operator==(const Node<T>& rhs) const {
-		return m_value == rhs.get_value();
-	}
-	bool operator!=(const Node<T>& rhs) const {
-		return m_value != rhs.get_value();
-	}
-
-	explicit Node(T value) : m_value(value) {}
-
-	virtual ~Node() {}
+	virtual ~Node() { };
 };
+
 
 }	/* avl */
 

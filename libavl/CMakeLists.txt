@@ -1,5 +1,5 @@
 set(sources
-	src/node.cpp
+	src/avl_tree.cpp
 	)
 
 include_directories(include)
