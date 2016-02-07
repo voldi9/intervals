@@ -52,4 +52,6 @@ CMakeScripts \
 Makefile \
 cmake_install.cmake \
 install_manifest.txt \
-build/
+build/ \
+libavl/ \
+bin/

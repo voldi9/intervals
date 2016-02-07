@@ -6,11 +6,12 @@
 
 namespace avl {
 
-#define NodePtr std::shared_ptr<Node<T>>
+#define NodePtr std::shared_ptr<avl::Node<T>>
 
 template <typename T>
 class AvlTree {
 private:
+	unsigned int m_size {0};
 	NodePtr m_root {};
 	void rebalance();
 	void rotate_rr();
@@ -22,11 +23,13 @@ private:
 	void dfs_clean(const NodePtr& node);
 public:
 	AvlTree () {}
-	AvlTree (const T& value) { m_root.reset(new Node<T>(value)); }
+	AvlTree (const T& value) { m_root.reset(new Node<T>(value)); m_size++; }
 	NodePtr add_key(const T& value);
+	NodePtr find_key(const T& value) const;
 	const NodePtr& get_root() const {
 		return m_root;
 	}
+	unsigned int get_size() { return m_size; }
 	~AvlTree() { dfs_clean(m_root); }
 };
 
@@ -66,6 +69,7 @@ NodePtr AvlTree<T>::add_key(const T& value) {
 				if(!current->get_lson()) {
 					current->set_lson(node);
 					node->set_parent(current);
+					m_size++;
 					break;
 				}
 				current = current->get_lson();
@@ -74,6 +78,7 @@ NodePtr AvlTree<T>::add_key(const T& value) {
 				if(!current->get_rson()) {
 					current->set_rson(node);
 					node->set_parent(current);
+					m_size++;
 					break;
 				}
 				current = current->get_rson();
@@ -83,8 +88,29 @@ NodePtr AvlTree<T>::add_key(const T& value) {
 	return node;
 }
 
-//template <typename T>
-//NodePtr AvlTree<T>::find_key(const T& value) const {}
+template <typename T>
+NodePtr AvlTree<T>::find_key(const T& value) const {
+	auto current = m_root;
+	while(true) {
+		if(value == current->get_value()) { 
+			return current;
+		}
+		if(value < current->get_value()) {
+			if(!current->get_lson()) {
+				//TODO: exception, key not found
+				return NodePtr();
+			}
+			current = current->get_lson();
+		}
+		if(value > current->get_value()) {
+			if(!current->get_rson()) {
+				//TODO: exception, key not found
+				return NodePtr();
+			}
+			current = current->get_rson();
+		}
+	}
+}
 //template <typename T>
 //NodePtr AvlTree<T>::remove_key(const T& value) {}
 
