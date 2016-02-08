@@ -1,19 +1,20 @@
 #include <avl_tree.hpp>
 #include <iostream>
+#include <random>
+#include "avl_tree.hpp"
 
 int main() {
-	auto t = avl::AvlTree<int>(6);
-	auto z = t.add_key(5);
-	auto z2 = t.add_key(4);
-	auto z3 = t.add_key(7);
-	auto r = t.get_root();
-	auto r2 = std::shared_ptr<avl::Node<int>>(r);
-	std::cout << "efqfeqw\n" << r2->get_value() << "\n" << std::endl;
-	auto t1 = avl::AvlTree<int>(546);
-	std::cout << "efqfeqw\n" << t1.get_root()->get_value() << "\n" << std::endl;
-	auto t2 = avl::AvlTree<int>(56);
-	std::cout << "efqfeqw\n" << t2.get_root()->get_value() << "\n" << std::endl;
-	auto t3 = avl::AvlTree<int>(55);
-	std::cout << "efqfeqw\n" << t3.get_root()->get_value() << "\n" << std::endl;
+	const unsigned int RANDOM_TIMES = 100;
+	const unsigned int MAX_VALUE = 1000;
+	//std::random_device r;
+    //std::mt19937 generator(r());
+    //std::uniform_int_distribution<int> random_value(-MAX_VALUE, MAX_VALUE);
+    auto avl = avl::AvlTree<int>();
+    unsigned int quantity = 0;
+    for(int i = 0; i < RANDOM_TIMES; i++) {
+    	if(avl.add_key(i)) {
+    		quantity++;
+    	}
+    }
 	return 0;
 }
