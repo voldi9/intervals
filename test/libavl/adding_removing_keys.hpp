@@ -17,10 +17,11 @@ TEST(LibAvlRemovingKeys, keep_removing_root_check_size)
 	while(n--) {
 		auto avl = generate_random_int_tree(TREE_SIZE, MAX_TEST_UINT);
 		int size = avl.get_size();
-		ASSERT_FALSE(avl.remove_key(0));
+		ASSERT_FALSE(avl.remove_key(nullptr));
 		while(size--) {
-			avl.remove_key(avl.get_root()->get_value());
+			avl.remove_key(avl.get_root());
 			ASSERT_EQ(size, avl.get_size());
+			validate_bst(avl.get_root());
 		}
 		ASSERT_FALSE(avl.remove_key(0));
 	}
@@ -41,8 +42,9 @@ TEST(LibAvlRemovingKeys, remove_random_check_all)
 			avl.remove_key(vector[vector.size()-1]);
 			vector.pop_back();
 			ASSERT_EQ(vector.size(), get_subtree_count(avl.get_root()));
-			ASSERT_TRUE(validate_depth(avl.get_root()));
-			ASSERT_TRUE(validate_balance(avl.get_root()));
+			validate_depth(avl.get_root());
+			validate_balance(avl.get_root());
+			validate_bst(avl.get_root());
 		}
 		ASSERT_EQ(0, avl.get_size());
 	}
@@ -77,16 +79,16 @@ TEST(LibAvlRemovingKeys, random_adds_and_removals_check_all)
 				avl.remove_key(*remove_it);
 				set.erase(remove_it);
 			}
-			ASSERT_EQ(set.size(), get_subtree_count(avl.get_root()));
-			ASSERT_TRUE(validate_depth(avl.get_root()));
-			ASSERT_TRUE(validate_balance(avl.get_root()));
+			validate_depth(avl.get_root());
+			validate_balance(avl.get_root());
+			validate_bst(avl.get_root());
 		}
 		ASSERT_EQ(0, avl.get_size());
 	}
 }
 
 /*
-	We keep generate a random tree. We try to delete a random value (randomly chosen between existent 
+	We generate a random tree. We try to delete a value (randomly chosen between existent 
 	in the tree and totally random) until the tree is empty.
 */
 TEST(LibAvlRemovingKeys, random_removals_check_all)
@@ -114,8 +116,9 @@ TEST(LibAvlRemovingKeys, random_removals_check_all)
 			avl.remove_key(vector[vector.size()-1]);
 			vector.pop_back();
 			ASSERT_EQ(vector.size(), get_subtree_count(avl.get_root()));
-			ASSERT_TRUE(validate_depth(avl.get_root()));
-			ASSERT_TRUE(validate_balance(avl.get_root()));
+			validate_depth(avl.get_root());
+			validate_balance(avl.get_root());
+			validate_bst(avl.get_root());
 		}
 		ASSERT_EQ(0, avl.get_size());
 	}

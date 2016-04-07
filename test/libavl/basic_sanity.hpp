@@ -29,6 +29,7 @@ TEST(LibAvlBasicSanity, validate_with_set)
 	    	else {
 	    		ASSERT_TRUE(avl.find_key(value));
 	    	}
+	    	validate_bst(avl.get_root());
 			ASSERT_EQ(quantity, get_subtree_count(avl.get_root()));
 			ASSERT_EQ(quantity, keys.size());
 		}

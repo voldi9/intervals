@@ -8,13 +8,12 @@ namespace test {
 /*
 	We brutally check if the node's depths properties are set right.
 */
-#include <iostream>
 TEST(LibAvlDepthAndBalance, validate_depth)
 {
 	auto n = TEST_NUMBER;
 	while(n--) {
 		auto avl = generate_random_int_tree(TREE_SIZE, MAX_TEST_UINT);
-		ASSERT_TRUE(validate_depth(avl.get_root()));
+		validate_depth(avl.get_root());
 	}
 }
 
@@ -26,7 +25,7 @@ TEST(LibAvlDepthAndBalance, validate_balance)
 	auto n = TEST_NUMBER;
 	while(n--) {
 		auto avl = generate_random_int_tree(TREE_SIZE, MAX_TEST_UINT);
-		ASSERT_TRUE(validate_balance(avl.get_root()));
+		validate_balance(avl.get_root());
 	}
 }
 

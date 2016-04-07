@@ -1,5 +1,5 @@
-add_executable(libavl main.cpp)
+add_executable(libavl_test main.cpp)
 
-target_link_libraries(libavl gtest gtest_main)
+target_link_libraries(libavl_test gtest gtest_main)
 
-add_test(libavl test_libavl)
+add_test(libavl_test test_libavl)

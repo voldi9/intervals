@@ -22,7 +22,6 @@ private:
 	void rebalance(const NodePtr& node);
 	void set_root(const NodePtr& node);
 	void dfs_clean(const NodePtr& node);
-	const NodePtr& exchange(const NodePtr& old_node, const NodePtr& new_node);
 	NodePtr create_node(const T& value) const;
 	void add_to_key_vector(std::vector<T>& vector, const NodePtr& node) const;
 public:
@@ -30,7 +29,9 @@ public:
 	AvlTree (const T& value) { m_root.reset(new Node<T>(value)); m_size++; }
 	~AvlTree() { dfs_clean(m_root); }
 	NodePtr add_key(const T& value);
-	NodePtr remove_key(const T& value);
+	NodePtr add_key(const NodePtr& node);
+	bool remove_key(const T& value);
+	bool remove_key(NodePtr node);
 	NodePtr find_key(const T& value) const;
 	const NodePtr& get_root() const { return m_root; }
 	uint get_size() { return m_size; }
@@ -53,28 +54,7 @@ void AvlTree<T>::set_root(const NodePtr& node) {
 
 template <typename T>
 NodePtr AvlTree<T>::create_node(const T& value) const {
-	return NodePtr(new Node<T>(value));
-}
-
-template <typename T>
-const NodePtr& AvlTree<T>::exchange(const NodePtr& old_node, const NodePtr& new_node) {
-	if(old_node->get_parent()) {
-		if(old_node->get_parent()->get_lson() == old_node) {
-			old_node->get_parent()->set_lson(new_node);
-		}
-		else if(old_node->get_parent()->get_rson() == old_node) {
-			old_node->get_parent()->set_rson(new_node);
-		}
-		new_node->set_parent(old_node->get_parent());
-	}
-	if(old_node->get_lson()) {
-		new_node->set_lson(old_node->get_lson());
-	}
-	if(old_node->get_rson()) {
-		new_node->set_rson(old_node->get_rson());
-	}
-	old_node->release();
-	return new_node;
+	return std::make_shared<Node<T>>(Node<T>(value));
 }
 
 template <typename T>
@@ -107,6 +87,7 @@ void AvlTree<T>::rebalance(const NodePtr& node) {
 	if(!node) {
 		return;
 	}
+	// TODO: rotations
 	node->set_depth(1 + max(node->get_lson_depth(), node->get_rson_depth()));
 	rebalance(node->get_parent());
 	return;
@@ -114,70 +95,83 @@ void AvlTree<T>::rebalance(const NodePtr& node) {
 
 /*
 	Returns a shared pointer to the node with the given key value
-	added to the tree or an empty share pointer if the key was already
-	present int the tree.
-*/ 
+	added to the tree or a nullptr if the key was already present 
+	in the tree.
+*/
 template <typename T>
-NodePtr AvlTree<T>::add_key(const T& value) {
-	auto node = create_node(value);
+NodePtr AvlTree<T>::add_key(const NodePtr& new_node) {
 	if(!m_root) {
-		set_root(node);
+		set_root(new_node);
 	}
 	else { 
-		auto current = m_root;
-		while(true) {
-			if(node->get_value() == current->get_value()) {
-				return NodePtr(); 
+		auto node = m_root;
+		while(node) {
+			if(new_node->get_value() == node->get_value()) {
+				return nullptr; 
 			}
-			if(node->get_value() < current->get_value()) {
-				if(!current->get_lson()) {
-					current->set_lson(node);
+			if(new_node->get_value() < node->get_value()) {
+				if(!node->get_lson()) {
+					node->set_lson(new_node);
 					break;
 				}
-				current = current->get_lson();
+				node = node->get_lson();
 			}
-			if(node->get_value() > current->get_value()) {
-				if(!current->get_rson()) {
-					current->set_rson(node);
+			if(new_node->get_value() > node->get_value()) {
+				if(!node->get_rson()) {
+					node->set_rson(new_node);
 					break;
 				}
-				current = current->get_rson();
+				node = node->get_rson();
 			}
 		}
-		node->set_parent(current);
+		new_node->set_parent(node);
 	}
 	m_size++;
-	rebalance(node);
-	return node;
+	rebalance(new_node);
+	return new_node;
+}
+
+
+template <typename T>
+NodePtr AvlTree<T>::add_key(const T& value) {
+	return add_key(create_node(value));
 }
 
 
 /*
 	Removes a node with a given value from the tree.
-	Returns a shared pointer to:
-		-nullptr if the removed key was the only one in the tree
-		 or if it was not present in the tree
-		-the removed node's parent if the removed node is a leaf
-		-the removed node's longer-subtree-having son otherwise
-*/ 
-template <typename T>
-NodePtr AvlTree<T>::remove_key(const T& value) {
-	auto node = find_key(value);
-	if(!node) {
-		return node;
-	}
-	if(node == m_root && m_size == 1) {
-		m_root = nullptr;
-		m_size--;
-		return m_root;
-	}
-	if(node->is_leaf()) {
-		m_size--;
-		return exchange(node, nullptr);
-	}
+	Returns a true if the removal succeeded, false otherwise.
+*/
 
-	//TODO: finish implementation
+template <typename T>
+bool AvlTree<T>::remove_key(NodePtr node) {
+	if(!node) {
+		return false;
+	}
+	if(!node->has_both_sons()) {
+		NodePtr son;
+		son = node->has_lson() ? node->get_lson() : 
+						         node->get_rson();
+		if(node == m_root) {
+			m_root = son;
+		}
+		node->substitute(son);
+		rebalance(son);
+		m_size--;
+	}
+	else {
+		auto next = node->find_next();
+		node->set_value(next->get_value());
+		remove_key(next);
+	}
+	return true;
 }
+
+template <typename T>
+bool AvlTree<T>::remove_key(const T& value) {
+	return remove_key(find_key(value));
+}
+
 
 /*
 	Returns a shared pointer to the node with the given key value
@@ -185,35 +179,28 @@ NodePtr AvlTree<T>::remove_key(const T& value) {
 */ 
 template <typename T>
 NodePtr AvlTree<T>::find_key(const T& value) const {
-	if(!m_root) {
-		return NodePtr();
-	}
-	auto current = m_root;
-	while(true) {
-		if(value == current->get_value()) { 
-			return current;
+	auto node = m_root;
+	while(node) {
+		if(value == node->get_value()) { 
+			break;
 		}
-		if(value < current->get_value()) {
-			if(!current->get_lson()) {
-				return NodePtr();
-			}
-			current = current->get_lson();
+		if(value < node->get_value()) {
+			node = node->get_lson();
 		}
-		if(value > current->get_value()) {
-			if(!current->get_rson()) {
-				return NodePtr();
-			}
-			current = current->get_rson();
+		if(value > node->get_value()) {
+			node = node->get_rson();
 		}
 	}
+	return node;
 }
 
 template <typename T>
 void AvlTree<T>::dfs_clean(const NodePtr& node) {
-	if(node->get_lson())
-		dfs_clean(node->get_lson());
-	if(node->get_rson())
-		dfs_clean(node->get_rson());
+	if(!node) {
+		return;
+	}
+	dfs_clean(node->get_lson());
+	dfs_clean(node->get_rson());
 	node->release();
 }
 

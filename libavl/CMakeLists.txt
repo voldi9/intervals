@@ -4,9 +4,9 @@ set(sources
 
 include_directories(include)
 
-add_library(LibAvl ${sources})
+add_library(avl ${sources})
 
-set_target_properties(LibAvl
+set_target_properties(avl
 					PROPERTIES
 					LINKER_LANGUAGE CXX
 					OUTPUT_NAME avl)
